@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CreditCard, HelpCircle, Package } from 'lucide-react';
+import { CreditCard, HelpCircle, Package, Star, Accessibility } from 'lucide-react';
 import { io } from 'socket.io-client';
 
 const socket = io(`http://${window.location.hostname}:3000`);
@@ -13,7 +13,6 @@ export default function AdminScreen() {
       setIssuedTicket(ticket);
       if (timerRef.current) clearTimeout(timerRef.current);
       
-      // Auto-reset after 5 seconds without user clicking
       timerRef.current = setTimeout(() => {
         setIssuedTicket(null);
       }, 5000);
@@ -38,7 +37,6 @@ export default function AdminScreen() {
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-8 font-sans">
       
       {issuedTicket ? (
-        // Static, solid, non-animated success screen
         <div className="flex flex-col items-center w-full max-w-sm">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
             You are in line!
@@ -69,40 +67,59 @@ export default function AdminScreen() {
         </div>
 
       ) : (
-        // Static selection screen with no hover animations
         <div className="w-full max-w-5xl text-center">
           <h1 className="text-5xl font-extrabold text-white mb-4 tracking-tight">Welcome</h1>
           <p className="text-xl text-slate-400 mb-12">Please tap the purpose of your visit to get a ticket.</p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             <button 
               onClick={() => handleCreateTicket('Payment')}
-              className="bg-slate-800 border-2 border-slate-700 hover:border-indigo-500 hover:bg-slate-800/80 p-10 rounded-2xl flex flex-col items-center gap-6"
+              className="w-full md:w-64 bg-slate-800 border-2 border-slate-700 hover:border-indigo-500 hover:bg-slate-800/80 p-8 rounded-2xl flex flex-col items-center gap-4 transition-all"
             >
               <div className="bg-slate-900 p-6 rounded-full">
-                <CreditCard size={48} className="text-indigo-400" />
+                <CreditCard size={40} className="text-indigo-400" />
               </div>
-              <span className="text-2xl font-bold text-slate-200">Payment</span>
+              <span className="text-xl font-bold text-slate-200">Payment</span>
             </button>
 
             <button 
               onClick={() => handleCreateTicket('Customer Service')}
-              className="bg-slate-800 border-2 border-slate-700 hover:border-amber-500 hover:bg-slate-800/80 p-10 rounded-2xl flex flex-col items-center gap-6"
+              className="w-full md:w-64 bg-slate-800 border-2 border-slate-700 hover:border-amber-500 hover:bg-slate-800/80 p-8 rounded-2xl flex flex-col items-center gap-4 transition-all"
             >
               <div className="bg-slate-900 p-6 rounded-full">
-                <HelpCircle size={48} className="text-amber-400" />
+                <HelpCircle size={40} className="text-amber-400" />
               </div>
-              <span className="text-2xl font-bold text-slate-200">Customer Service</span>
+              <span className="text-xl font-bold text-slate-200">Customer Service</span>
             </button>
 
             <button 
               onClick={() => handleCreateTicket('Returns / Pickup')}
-              className="bg-slate-800 border-2 border-slate-700 hover:border-emerald-500 hover:bg-slate-800/80 p-10 rounded-2xl flex flex-col items-center gap-6"
+              className="w-full md:w-64 bg-slate-800 border-2 border-slate-700 hover:border-emerald-500 hover:bg-slate-800/80 p-8 rounded-2xl flex flex-col items-center gap-4 transition-all"
             >
               <div className="bg-slate-900 p-6 rounded-full">
-                <Package size={48} className="text-emerald-400" />
+                <Package size={40} className="text-emerald-400" />
               </div>
-              <span className="text-2xl font-bold text-slate-200">Returns / Pickup</span>
+              <span className="text-xl font-bold text-slate-200">Returns / Pickup</span>
+            </button>
+
+            <button 
+              onClick={() => handleCreateTicket('Senior')}
+              className="w-full md:w-64 bg-slate-800 border-2 border-slate-700 hover:border-yellow-400 hover:bg-slate-800/80 p-8 rounded-2xl flex flex-col items-center gap-4 transition-all"
+            >
+              <div className="bg-slate-900 p-6 rounded-full">
+                <Star size={40} className="text-yellow-400" />
+              </div>
+              <span className="text-xl font-bold text-slate-200">Senior</span>
+            </button>
+
+            <button 
+              onClick={() => handleCreateTicket('PWD')}
+              className="w-full md:w-64 bg-slate-800 border-2 border-slate-700 hover:border-yellow-400 hover:bg-slate-800/80 p-8 rounded-2xl flex flex-col items-center gap-4 transition-all"
+            >
+              <div className="bg-slate-900 p-6 rounded-full">
+                <Accessibility size={40} className="text-yellow-400" />
+              </div>
+              <span className="text-xl font-bold text-slate-200">PWD</span>
             </button>
           </div>
         </div>
