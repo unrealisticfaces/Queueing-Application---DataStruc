@@ -3,22 +3,19 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 
 const app = express();
-app.get('/', (req, res) => res.send('✅ Fully Automated Queue Server is running!'));
+app.get('/', (req, res) => res.send('Fully Automated Queue Server is running!'));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
 let unassignedQueue = [];
 let ticketCounter = 1;
-const MAX_PER_CASHIER = 5;
 
 let cashiers = {
-  1: { serving: null, line: [] },
-  2: { serving: null, line: [] },
-  3: { serving: null, line: [] }
+  1: { serving: null, isAccepting: true },
+  2: { serving: null, isAccepting: true },
+  3: { serving: null, isAccepting: true }
 };
-
-const getLoad = (c) => (c.serving ? 1 : 0) + c.line.length;
 
 function addTicketToQueue(queue, ticket) {
   const isPriority = ticket.purpose === 'Senior' || ticket.purpose === 'PWD';
@@ -38,24 +35,18 @@ function balanceQueues() {
   let assigned = true;
   
   while (assigned && unassignedQueue.length > 0) {
-    let bestCashierId = null;
-    let minLoad = Infinity;
+    let availableCashierId = null;
 
     for (let i = 1; i <= 3; i++) {
-      const load = getLoad(cashiers[i]);
-      if (load < minLoad && load < MAX_PER_CASHIER) {
-        minLoad = load;
-        bestCashierId = i;
+      if (cashiers[i].isAccepting && !cashiers[i].serving) {
+        availableCashierId = i;
+        break;
       }
     }
 
-    if (bestCashierId) {
+    if (availableCashierId) {
       const customer = unassignedQueue.shift();
-      if (!cashiers[bestCashierId].serving) {
-        cashiers[bestCashierId].serving = customer;
-      } else {
-        addTicketToQueue(cashiers[bestCashierId].line, customer);
-      }
+      cashiers[availableCashierId].serving = customer;
     } else {
       assigned = false;
     }
@@ -82,21 +73,27 @@ io.on('connection', (socket) => {
   });
 
   socket.on('finish-serving', (cashierId) => {
-    const c = cashiers[cashierId];
-    
-    if (c.line.length > 0) {
-      c.serving = c.line.shift(); 
-    } else {
-      c.serving = null; 
+    if (cashiers[cashierId]) {
+      cashiers[cashierId].serving = null; 
     }
 
     balanceQueues();
     
     io.emit('queue-updated', { unassignedQueue, cashiers });
   });
+
+  socket.on('toggle-accepting', ({ cashierId, isAccepting }) => {
+    if (cashiers[cashierId]) {
+      cashiers[cashierId].isAccepting = isAccepting;
+      if (isAccepting) {
+        balanceQueues();
+      }
+      io.emit('queue-updated', { unassignedQueue, cashiers });
+    }
+  });
 });
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
-httpServer.listen(PORT, HOST, () => console.log(`✅ Automated Server running on port ${PORT}`));
+httpServer.listen(PORT, HOST, () => console.log(`Automated Server running on port ${PORT}`));
